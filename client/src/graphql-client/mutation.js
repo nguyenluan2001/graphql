@@ -18,4 +18,21 @@ const createBook=gql`
         }
     }
 `
-export {createAuthor,createBook}
+const updateBook=gql`
+    mutation updateBook($id:ID!,$name:String,$genre:String,$authorID:ID)
+    {
+        updateBook(id:$id,name:$name,genre:$genre,authorID:$authorID)
+        {
+            id
+            name
+            genre
+        }
+    }
+`
+const deleteBook=gql`
+    mutation deleteBook($id:ID)
+    {
+        deleteBook(id:$id)
+    }
+`
+export {createAuthor,createBook,deleteBook,updateBook}

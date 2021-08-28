@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useFormik } from "formik"
 import { useQuery, useMutation } from "@apollo/client"
 import { getAuthors, getBooks } from "../graphql-client/query"
-import { createAuthor, createBook } from "../graphql-client/mutation"
-function Form() {
+import { createAuthor, createBook,updateBook } from "../graphql-client/mutation"
+function Form({ selectedBook, editBook }) {
     const { loading, error, data } = useQuery(getAuthors)
     const [addAuthor, dataMutationAuthor] = useMutation(createAuthor)
+    const [updateBookMutation,dataMutationBookUpdate]=useMutation(updateBook)
     const authorForm = useFormik({
         initialValues: {
             name: "",
@@ -30,39 +31,64 @@ function Form() {
             authorID: ""
         },
         onSubmit: values => {
-            console.log(values)
-            addBook({
-                variables: {
-                    name: values.name,
-                    genre: values.genre,
-                    authorID: values.authorID
-                },
-                refetchQueries:[{query:getBooks}]
-            })
+            if (editBook) {
+                console.log(values)
+                updateBookMutation({
+                    variables:{
+                        id:editBook.id,
+                        name:values.name,
+                        genre:values.genre,
+                        authorID:values.authorID
+                    },
+                    refetchQueries:[{query:getBooks}]
+                })
+            }
+            else {
+                console.log(values)
+                addBook({
+                    variables: {
+                        name: values.name,
+                        genre: values.genre,
+                        authorID: values.authorID
+                    },
+                    refetchQueries: [{ query: getBooks }]
+                })
+            }
         }
     })
-   
-    console.log(data)
+    useEffect(() => {
+        if (editBook) {
+            bookForm.setFieldValue("name", editBook.name)
+            bookForm.setFieldValue("genre", editBook.genre)
+            bookForm.setFieldValue("authorID", editBook.author.id)
+            console.log(editBook)
+        }
+    }, [editBook])
     return (
         <>
             <div className="col-6">
                 <form action="" onSubmit={bookForm.handleSubmit}>
                     <div className="form-group">
-                        <input type="text" placeholder="Book name" name="name" onChange={bookForm.handleChange} className="form-control" />
+                        <input type="text" placeholder="Book name" name="name" value={bookForm.values.name} onChange={bookForm.handleChange} className="form-control" />
                     </div>
                     <div className="form-group">
-                        <input type="text" placeholder="Book genre" name="genre" onChange={bookForm.handleChange} className="form-control" />
+                        <input type="text" placeholder="Book genre" name="genre" value={bookForm.values.genre} onChange={bookForm.handleChange} className="form-control" />
                     </div>
                     <div className="form-group">
-                        <select name="authorID" onChange={bookForm.handleChange} id="" className="custom-select">
+                        <select name="authorID" value={bookForm.values.authorID} onChange={bookForm.handleChange} id="" className="custom-select">
                             {
                                 data?.authors.map(item => {
-                                    return <option value={item.id}>{item.name}</option>
+                                    return <option selected={item.id == bookForm.values.authorID ? "selected" : ""} value={item.id}>{item.name}</option>
                                 })
                             }
                         </select>
                     </div>
-                    <button className="btn btn-success">Add book</button>
+                    {
+                        editBook ?
+                            <button className="btn btn-danger    ">Edit book</button>
+                            : <button className="btn btn-success">Add book</button>
+                    }
+
                 </form>
             </div>
             <div className="col-6">

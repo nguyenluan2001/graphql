@@ -8,22 +8,23 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 })
 function App() {
-  const [bookId,setBookId]=useState(null)
+  const [selectedBook,setSelectedBook]=useState(null)
+  const [editBook,setEditBook]=useState(null)
   return (
     <ApolloProvider client={client}>
       <div className="App">
         <div className="container">
           <h3>My Books</h3>
           <div className="row">
-            <Form></Form>
+            <Form editBook={editBook}></Form>
             <div className="col-12">
               <div className="container">
                 <div className="row">
                   <div className="col-7">
-                    <ListBooks setBookId={setBookId}></ListBooks>
+                    <ListBooks  setEditBook={setEditBook} setSelectedBook={setSelectedBook}></ListBooks>
                   </div>
                   <div className="col-5">
-                    <BookDetail bookId={bookId}></BookDetail>
+                    <BookDetail  selectedBook={selectedBook}></BookDetail>
                   </div>
                 </div>
               </div>
